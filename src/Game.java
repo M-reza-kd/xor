@@ -1,4 +1,7 @@
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.Random;
 
 public class Game {
@@ -8,6 +11,8 @@ public class Game {
         int[][] board;
         int winner;
         Color[] Player;
+        graphic Map;
+
 
         public void setN(int n){
                 this.n = n;
@@ -38,17 +43,39 @@ public class Game {
                 setM(m);
                 setBoard();
                 setPlayer();
-                turn = -1;
+                turn = 0;
                 winner = 0;
+                Map = new graphic(n , m);
+
+                ActionListener actionListener = e1 -> {
+                        int t = Integer.parseInt(Map.whosTurn.getText());
+                        MyJButton src = (MyJButton) e1.getSource();
+                        if(board[src.getX()][src.getY()] != 0) {
+                                src.setBackground(Player[t]);
+                                ChangeTurn();
+                        }
+                        else{
+                                try {
+                                        throw new IOException("Select valid place");
+                                } catch (IOException ex) {
+                                        throw new RuntimeException(ex);
+                                }
+                        }
+                };
+
+                for(int i = 0; i < n ; i++)
+                        for(int j = 0; j < m; j++)
+                                Map.mapButton[i][j].addActionListener(actionListener);
         }
 
-        public void ChageTurn(){
+        public void ChangeTurn(){
                 CheckForWinner();
                 if(winner == 0) {
                         turn++;
                         turn %= numberOfPlayers;
                 }else{
                         System.out.println("the winner is the " + winner + "'th person");
+                        Map.whosTurn.setText("the winner is the " + winner + "'th person");
                 }
         }
         public void CheckForWinner(){

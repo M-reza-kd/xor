@@ -72,7 +72,7 @@ public class Game {
                         turn++;
                         turn %= numberOfPlayers;
                         Map.whosTurn.setText(String.valueOf(turn + 1));
-                } else if (winner == -2) {
+                } else if  (winner == -2) {
                         Map.whosTurn.setText("pot");
                 } else{
                         System.out.println("the winner is the " + (winner + 1) + "'th person");

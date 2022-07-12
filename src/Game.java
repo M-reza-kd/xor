@@ -1,19 +1,13 @@
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.Random;
 
 public class Game {
-        int turn;
-        int numberOfPlayers;
-        int n, m;
+        int turn, n, m, numberOfPlayers, winner;
         int[][] board;
-        int winner;
         Color[] Player;
         graphic Map;
-
-
         public void setN(int n){
                 this.n = n;
         }
@@ -28,6 +22,7 @@ public class Game {
         }
         public void setPlayer() {
                 Random rand = new Random();
+                Player = new Color[numberOfPlayers];
                 for(int i = 0; i < numberOfPlayers ; i++) {
                         int r = rand.nextInt(255), g = rand.nextInt(255), b = rand.nextInt(255);
                         Player[i] = new Color(r, g, b);
@@ -44,56 +39,72 @@ public class Game {
                 setBoard();
                 setPlayer();
                 turn = 0;
-                winner = 0;
+                winner = -1;
                 Map = new graphic(n , m);
-
+                Map.frame.setBounds(100,100,800,900);
                 ActionListener actionListener = e1 -> {
-                        int t = Integer.parseInt(Map.whosTurn.getText());
                         MyJButton src = (MyJButton) e1.getSource();
-                        if(board[src.getX()][src.getY()] != 0) {
-                                src.setBackground(Player[t]);
+                        if(board[src.getx()][src.gety()] != -1)
+                                try {
+                                        throw new IOException("select another loc");
+                                } catch (IOException e) {
+                                        throw new RuntimeException(e);
+                                }
+                        else {
+                                src.setBackground(Player[turn]);
+                                board[src.getx()][src.gety()] = turn;
                                 ChangeTurn();
                         }
-                        else{
-                                try {
-                                        throw new IOException("Select valid place");
-                                } catch (IOException ex) {
-                                        throw new RuntimeException(ex);
-                                }
-                        }
                 };
-
                 for(int i = 0; i < n ; i++)
-                        for(int j = 0; j < m; j++)
-                                Map.mapButton[i][j].addActionListener(actionListener);
+                        for(int j = 0; j < m; j++){
+                                MyJButton temp = Map.mapButton[i][j];
+                                temp.addActionListener(actionListener);
+                                Map.panel.add(temp);
+                                board[i][j] = -1;
+                        }
+                Map.frame.setVisible(true);
         }
 
         public void ChangeTurn(){
                 CheckForWinner();
-                if(winner == 0) {
+                if(winner == -1) {
                         turn++;
                         turn %= numberOfPlayers;
-                }else{
-                        System.out.println("the winner is the " + winner + "'th person");
-                        Map.whosTurn.setText("the winner is the " + winner + "'th person");
+                        Map.whosTurn.setText(String.valueOf(turn + 1));
+                } else if (winner == -2) {
+                        Map.whosTurn.setText("pot");
+                } else{
+                        System.out.println("the winner is the " + (winner + 1) + "'th person");
+                        Map.whosTurn.setText("the winner is the " + (winner + 1) + "'th person");
                 }
         }
         public void CheckForWinner(){
                 for(int i = 0; i < n; i++)
                         for(int j = 0; j  + 2 < m; j++)
-                                if(board[i][j] == board[i][j + 1] && board[i][j] == board[i][j + 2])
+                                if(board[i][j] == board[i][j + 1] && board[i][j] == board[i][j + 2] && board[i][j] != -1)
                                         winner = board[i][j];
                 for(int j = 0; j < m; j++)
                         for(int i = 0; i + 2 < n; i++)
-                                if(board[i][j] == board[i + 1][j] && board[i + 2][j] == board[i + 2][j])
+                                if(board[i][j] == board[i + 1][j] && board[i][j] == board[i + 2][j] && board[i][j] != -1)
                                         winner = board[i][j];
                 for(int i = 0; i + 2 < n; i++)
                         for(int j = 0; j + 2 < m; j++)
-                                if(board[i][j] == board[i + 1][j + 1] && board[i][j] == board[i + 2][j + 2])
+                                if(board[i][j] == board[i + 1][j + 1] && board[i][j] == board[i + 2][j + 2] && board[i][j] != -1)
                                         winner = board[i][j];
                 for(int i = 2; i < n; i++)
                         for(int j = 2; j < m; j++)
-                                if(board[i][j] == board[i - 1][j - 1] && board[i][j] == board[i - 2][j - 2])
+                                if(board[i][j] == board[i - 1][j - 1] && board[i][j] == board[i - 2][j - 2] && board[i][j] != -1)
                                         winner = board[i][j];
+
+                boolean flag = false;
+                for(int i = 0 ; i < n; i++)
+                        for(int j = 0; j < m ; j++)
+                                if (board[i][j] == -1) {
+                                        flag = true;
+                                        break;
+                                }
+                if(!flag)
+                        winner = -2;
         }
 }
